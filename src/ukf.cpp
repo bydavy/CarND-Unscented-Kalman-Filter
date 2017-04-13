@@ -60,13 +60,58 @@ UKF::~UKF() {}
  * @param {MeasurementPackage} meas_package The latest measurement data of
  * either radar or laser.
  */
-void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
-  /**
-  TODO:
+void UKF::ProcessMeasurement(MeasurementPackage meas_pack) {
+  /*****************************************************************************
+   *  Initialization
+   ****************************************************************************/
+  if (!is_initialized_) {
+    // first measurement
+    cout << "EKF: " << endl;
 
-  Complete this function! Make sure you switch between lidar and radar
-  measurements.
-  */
+    if (meas_pack.sensor_type_ == MeasurementPackage::RADAR) {
+      float rho = meas_pack.raw_measurements_[0];
+      float phi = meas_pack.raw_measurements_[1];
+      float px = rho * cos(phi);
+      float py = rho * sin(phi);
+
+    } else if (meas_pack.sensor_type_ == MeasurementPackage::LASER) {
+    } else {
+      std::cout << "ProcessMeasurement () - Error - Unknown sensor type" << std::endl;
+      return;
+    }
+
+    time_us_ = meas_pack.timestamp_;
+
+    // done initializing, no need to predict or update
+    is_initialized_ = true;
+    return;
+  }
+
+  /*****************************************************************************
+   *  Prediction
+   ****************************************************************************/
+
+  //compute the time elapsed between the current and previous measurements
+  float dt = (meas_pack.timestamp_ - time_us_) / 1000000.0;	//dt - expressed in seconds
+  time_us_ = meas_pack.timestamp_;
+
+  Prediction(dt);
+
+  /*****************************************************************************
+ *  Update
+ ****************************************************************************/
+
+  if (meas_pack.sensor_type_ == MeasurementPackage::RADAR) {
+    UpdateRadar(meas_pack);
+  } else if(meas_pack.sensor_type_ == MeasurementPackage::LASER) {
+    UpdateLidar(meas_pack);
+  } else {
+    std::cout << "ProcessMeasurement () - Error - Unknown sensor type" << std::endl;
+  }
+
+  // print the output
+  cout << "x_ = " << x_ << endl;
+  cout << "P_ = " << P_ << endl;
 }
 
 /**
