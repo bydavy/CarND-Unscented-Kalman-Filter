@@ -215,7 +215,10 @@ void UKF::UpdateLidar(const VectorXd& z) {
   x_ += K * z_diff;
   P_ -= K*S*K.transpose();
 
-  NIS_laser_ = 0;
+  /*****************************************************************************
+   * Calculate NIS
+   ****************************************************************************/
+  NIS_laser_ = NIS(z, z_pred, S);
 }
 
 void UKF::UpdateRadar(VectorXd& z) {
@@ -314,7 +317,10 @@ void UKF::UpdateRadar(VectorXd& z) {
   x_ += K * z_diff;
   P_ -= K*S*K.transpose();
 
-  NIS_radar_ = 0;
+  /*****************************************************************************
+   * Calculate NIS
+   ****************************************************************************/
+  NIS_radar_ = NIS(z, z_pred, S);
 }
 
 void UKF::GenerateAugmentedSigmaPoints(MatrixXd& Xsig_aug) {
@@ -406,4 +412,9 @@ void UKF::PredictMeanAndCovariance() {
 
     P_ += weights_(i) * x_diff * x_diff.transpose() ;
   }
+}
+
+double UKF::NIS(const VectorXd& z_measured, const VectorXd& z_predicted, const MatrixXd& S_predicted) {
+  VectorXd diff_pred = (z_measured - z_predicted);
+  return diff_pred.transpose() * S_predicted.inverse() * diff_pred;
 }

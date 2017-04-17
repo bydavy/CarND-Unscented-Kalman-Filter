@@ -126,6 +126,11 @@ private:
      * Predicts mean and covariance
      */
     void PredictMeanAndCovariance();
+
+    /**
+     * @return the normalized innovation squared
+     */
+    double NIS(const VectorXd& z_measured, const VectorXd& z_predicted, const MatrixXd& S_predicted);
 };
 
 #endif /* UKF_H */
