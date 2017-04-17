@@ -102,6 +102,13 @@ void UKF::ProcessMeasurement(MeasurementPackage& meas_pack) {
       cout << "ProcessMeasurement () - Error - Unknown sensor type" << endl;
       return;
     }
+
+    // Don't allow initialization to zero
+    if (x_(0) == 0 && x_(1) == 0) {
+      cout << "ProcessMeasurement () - Skipped - First measurement had a position of zero" << endl;
+      return;
+    }
+
     // TODO improve initial values of P_
     P_.setIdentity();
 
